@@ -1,24 +1,23 @@
 package io.github.rsaestrela.shuttle;
 
+import io.github.rsaestrela.shuttle.decisor.exception.ShuttleDecisorIndeterminateResultException;
+
 import java.util.Collection;
 
 @SuppressWarnings("unchecked")
 public abstract class AbstractShuttleDecision<I extends Collection, O, F> implements ShuttleDecision<O> {
 
-    protected I i;
+    protected Collection<I> i;
     protected F f;
 
-    protected AbstractShuttleDecision(I i) {
+    protected AbstractShuttleDecision(Collection<I> i) {
         checkArgs(i);
         this.i = i;
         this.f = (F) i.toArray()[0];
     }
 
-    public abstract O decide();
+    public abstract O decide() throws ShuttleDecisorIndeterminateResultException;
 
-    private void checkArgs(I i) {
-        if (i == null || i.isEmpty()) {
-            throw new IllegalArgumentException();
-        }
-    }
+    protected abstract void checkArgs(Collection<I> i);
+
 }
