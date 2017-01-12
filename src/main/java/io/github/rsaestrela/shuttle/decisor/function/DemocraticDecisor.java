@@ -6,8 +6,8 @@ import java.util.Collection;
 
 public interface DemocraticDecisor<I extends Collection<I>, O, F> {
 
-    int NUMBER_OF_ELEMENTS = 5;
-    int MAJORITY = 3;
+    int majority(Collection<I> i);
 
     O decide(Collection<I> i, F f) throws ShuttleDecisorIndeterminateResultException;
+
 }

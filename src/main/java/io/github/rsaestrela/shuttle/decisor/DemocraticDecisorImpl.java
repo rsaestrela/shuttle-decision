@@ -21,12 +21,17 @@ import static java.util.Optional.of;
 @SuppressWarnings("unchecked")
 public class DemocraticDecisorImpl<I extends Collection<I>, O, H> implements DemocraticDecisor<I, O, H> {
 
+    @Override
+    public int majority(Collection<I> i) {
+        return i.size() / 2 + 1;
+    }
+
     public O decide(Collection<I> i, H head) throws ShuttleDecisorIndeterminateResultException {
         if (!diffFound(i, head)) {
             return (O) head;
         }
         final Object[] iArray = i.toArray();
-        final Optional<Object> decision = getDecision(toResultMap(iArray));
+        final Optional<Object> decision = getDecision(toResultMap(iArray), majority(i));
         if (!decision.isPresent()) {
             throw new ShuttleDecisorIndeterminateResultException("Cannot compute a decision");
         }
@@ -37,10 +42,10 @@ public class DemocraticDecisorImpl<I extends Collection<I>, O, H> implements Dem
         final Object[] array = i.toArray();
         for (Object element : array) {
             if (!element.equals(head)) {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     private Map<?, Integer> toResultMap(Object[] i) {
@@ -55,10 +60,10 @@ public class DemocraticDecisorImpl<I extends Collection<I>, O, H> implements Dem
         return resultMap;
     }
 
-    private Optional<Object> getDecision(Map<?, Integer> resultMap) {
+    private Optional<Object> getDecision(Map<?, Integer> resultMap, int majority) {
         for (Object key: resultMap.keySet()) {
             int value = resultMap.get(key);
-            if (value >= MAJORITY) {
+            if (value >= majority) {
                 return of(key);
             }
         }

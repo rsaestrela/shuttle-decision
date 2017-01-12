@@ -26,8 +26,5 @@ public final class DefaultShuttleDecision<I extends Collection<I>, O, H> extends
         if (i == null || i.isEmpty()) {
             throw new ShuttleDecisorInstantiationException("Null or empty input");
         }
-        if (i.size() != DemocraticDecisor.NUMBER_OF_ELEMENTS) {
-            throw new ShuttleDecisorInstantiationException("Wrong number of input elements");
-        }
     }
 }
