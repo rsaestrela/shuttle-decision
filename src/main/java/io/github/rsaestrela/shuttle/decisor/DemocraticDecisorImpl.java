@@ -1,7 +1,7 @@
 package io.github.rsaestrela.shuttle.decisor;
 
 import io.github.rsaestrela.shuttle.decisor.exception.ShuttleDecisorIndeterminateResultException;
-import io.github.rsaestrela.shuttle.decisor.function.Decisor5;
+import io.github.rsaestrela.shuttle.decisor.function.DemocraticDecisor;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,33 +11,39 @@ import java.util.Optional;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
+/**
+ * "Democratic decision making is when the leader gives up ownership and control
+ * of a decision and allows the group to vote. Majority vote will decide the action.
+ * Advantages include a fairly fast decision, and a certain amount of group participation.
+ * The disadvantage of this style includes no responsibility."
+ * todo: documentation
+ */
 @SuppressWarnings("unchecked")
-public class Decisor5Impl<I extends Collection<I>, O, F> implements Decisor5<I, O, F> {
+public class DemocraticDecisorImpl<I extends Collection<I>, O, H> implements DemocraticDecisor<I, O, H> {
 
-    public O decide(Collection<I> i, F f) throws ShuttleDecisorIndeterminateResultException {
-        if (!diffFound(i)) {
-            return (O) f;
+    public O decide(Collection<I> i, H head) throws ShuttleDecisorIndeterminateResultException {
+        if (!diffFound(i, head)) {
+            return (O) head;
         }
         final Object[] iArray = i.toArray();
-        final Optional<Object> decision = getDecision(getResultMap(iArray));
+        final Optional<Object> decision = getDecision(toResultMap(iArray));
         if (!decision.isPresent()) {
             throw new ShuttleDecisorIndeterminateResultException("Cannot compute a decision");
         }
         return (O) decision.get();
     }
 
-    private boolean diffFound(Collection<I> i) {
+    private boolean diffFound(Collection<I> i, H head) {
         final Object[] array = i.toArray();
-        Object first = array[0];
         for (Object element : array) {
-            if (!element.equals(first)) {
+            if (!element.equals(head)) {
                 return false;
             }
         }
         return true;
     }
 
-    private Map<?, Integer> getResultMap(Object[] i) {
+    private Map<?, Integer> toResultMap(Object[] i) {
         Map<Object, Integer> resultMap = new HashMap<>();
         for (Object curr : i) {
             if (resultMap.containsKey(curr)) {

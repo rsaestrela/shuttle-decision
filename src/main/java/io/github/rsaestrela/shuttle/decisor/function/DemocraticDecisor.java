@@ -4,7 +4,7 @@ import io.github.rsaestrela.shuttle.decisor.exception.ShuttleDecisorIndeterminat
 
 import java.util.Collection;
 
-public interface Decisor5<I extends Collection<I>, O, F> {
+public interface DemocraticDecisor<I extends Collection<I>, O, F> {
 
     int NUMBER_OF_ELEMENTS = 5;
     int MAJORITY = 3;
