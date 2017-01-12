@@ -6,7 +6,7 @@ import java.util.Collection;
 
 public interface DemocraticDecisor<I extends Collection<I>, O, F> {
 
-    int majority(Collection<I> i);
+    double majority(Collection<I> i);
 
     O decide(Collection<I> i, F f) throws ShuttleDecisorIndeterminateResultException;
 

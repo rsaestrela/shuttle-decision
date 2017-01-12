@@ -22,8 +22,8 @@ import static java.util.Optional.of;
 public class DemocraticDecisorImpl<I extends Collection<I>, O, H> implements DemocraticDecisor<I, O, H> {
 
     @Override
-    public int majority(Collection<I> i) {
-        return i.size() / 2 + 1;
+    public double majority(Collection<I> i) {
+        return i.size() / 3;
     }
 
     public O decide(Collection<I> i, H head) throws ShuttleDecisorIndeterminateResultException {
@@ -60,7 +60,7 @@ public class DemocraticDecisorImpl<I extends Collection<I>, O, H> implements Dem
         return resultMap;
     }
 
-    private Optional<Object> getDecision(Map<?, Integer> resultMap, int majority) {
+    private Optional<Object> getDecision(Map<?, Integer> resultMap, double majority) {
         for (Object key: resultMap.keySet()) {
             int value = resultMap.get(key);
             if (value >= majority) {
