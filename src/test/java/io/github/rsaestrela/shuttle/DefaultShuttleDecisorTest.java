@@ -30,7 +30,7 @@ public class DefaultShuttleDecisorTest {
     }
 
     @Test(dataProvider = "emptyOrNullStructuresProvider")
-    public void shouldFailFastOnEmptyCollection(Collection<Object> collection) {
+    public void shouldFailFastOnEmptyCollection(Collection<?> collection) {
         try {
             new DefaultShuttleDecision<>(collection);
         } catch (ShuttleDecisorInstantiationException e) {
@@ -41,38 +41,25 @@ public class DefaultShuttleDecisorTest {
 
     @Test
     public void shouldReturnFirstValueIfAllTheSame() {
-        List<String> list = new ArrayList<>();
-        list.add("1");
-        list.add("1");
-        list.add("1");
-        list.add("1");
-        list.add("1");
+        ShuttleDecision<String> defaultShuttleDecision = new DefaultShuttleDecision<>(Arrays.asList("2", "2", "2", "2", "2"));
 
-        ShuttleDecision<String> defaultShuttleDecision = new DefaultShuttleDecision<>(list);
-        String decision = null;
         try {
-            decision = defaultShuttleDecision.decide();
+            String decision = defaultShuttleDecision.decide();
+            assertEquals(decision, "2");
         } catch (ShuttleDecisorIndeterminateResultException e) {
             fail();
         }
-        assertEquals(decision, "1");
     }
 
-    @Test//TODO: unexpected behaviour
-    public void shouldThrowIndeterminateException() {
-        List<String> list = new ArrayList<>();
-        list.add("1");
-        list.add("1");
-        list.add("1");
-        list.add("1");
-        list.add("2");
-
-        ShuttleDecision<String> defaultShuttleDecision = new DefaultShuttleDecision<>(list);
+    @Test
+    public void shouldDecideForTheMajority() {
+        ShuttleDecision<String> defaultShuttleDecision = new DefaultShuttleDecision<>(Arrays.asList("1", "1", "1", "2", "3"));
         try {
-            defaultShuttleDecision.decide();
+            String decision = defaultShuttleDecision.decide();
+            assertEquals(decision, "1");
         } catch (ShuttleDecisorIndeterminateResultException e) {
-            return;
+            fail();
         }
-        fail();
     }
+
 }
