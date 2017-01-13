@@ -9,26 +9,43 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 /**
- * "Democratic decision making is when the leader gives up ownership and control
- * of a decision and allows the group to vote. Majority vote will decide the action.
- * Advantages include a fairly fast decision, and a certain amount of group participation.
- * The disadvantage of this style includes no responsibility."
- * todo: documentation
+ * Collection based implementation of {@link DemocraticDecisor}.
+ *
+ * <i>Democratic decision making is when the leader gives up
+ * ownership and control of a decision and allows the group
+ * to vote. Majority vote will decide the action. Advantages
+ * include a fairly fast decision, and a certain amount of
+ * group participation. The disadvantage of this style includes
+ * no responsibility."</i>
+ *
  */
 @SuppressWarnings("unchecked")
-public class DemocraticDecisorImpl<I extends Collection<I>, O, H> implements DemocraticDecisor<I, O, H> {
+public class DemocraticDecisorImpl<I extends Collection<I>, O, H>
+        implements DemocraticDecisor<I, O, H> {
 
     private int majority = -1;
 
-    public O decide(Collection<I> i, H head) throws ShuttleDecisorIndeterminateResultException {
-        if (!diffFound(i, head)) {
+    /**
+     * Aims to choose an element from the supplied collection, based on
+     * democratic rules. Given a non empty collection of <i>n</i> elements
+     * it will decide to return the most repeated element found.
+     *
+     * If all elements are equal returns the parameter {@param head}.
+     * If all the elements exist in the same quantity in the provided
+     * collection or the most contained elements exist repeatedly
+     * it will throw a checked  {@link ShuttleDecisorIndeterminateResultException}
+     * exception.
+     */
+    public O decide(Collection<I> collection, H head) throws ShuttleDecisorIndeterminateResultException {
+
+        final Map<?, Integer> resultsMap = getResultsMap(collection);
+
+        if (sameElements(resultsMap)) {
             return (O) head;
         }
-        final Object[] iArray = i.toArray();
-        final Map<?, Integer> resultsMap = getResultsMap(iArray);
 
         getAndSetMajority(resultsMap);
-        failOnRepeatedMajorities(resultsMap);
+        noMajorityOnRepeated(resultsMap);
 
         final Optional<Object> decision = getDecision(resultsMap);
         if (!decision.isPresent()) {
@@ -37,19 +54,13 @@ public class DemocraticDecisorImpl<I extends Collection<I>, O, H> implements Dem
         return (O) decision.get();
     }
 
-    private boolean diffFound(Collection<I> i, H head) {
-        final Object[] array = i.toArray();
-        for (Object element : array) {
-            if (!element.equals(head)) {
-                return true;
-            }
-        }
-        return false;
+    private boolean sameElements(Map<?, Integer> resultsMap) {
+        return resultsMap.size() == 1;
     }
 
-    private Map<?, Integer> getResultsMap(Object[] i) {
+    private Map<?, Integer> getResultsMap(Collection<I> i) {
         Map<Object, Integer> resultsMap = new HashMap<>();
-        for (Object curr : i) {
+        for (Object curr : i.toArray()) {
             if (resultsMap.containsKey(curr)) {
                 resultsMap.put(curr, resultsMap.get(curr) + 1);
             } else {
@@ -67,14 +78,12 @@ public class DemocraticDecisorImpl<I extends Collection<I>, O, H> implements Dem
         }
     }
 
-    private void failOnRepeatedMajorities(Map<?, Integer> resultsMap) {
+    private void noMajorityOnRepeated(Map<?, Integer> resultsMap) {
         Set<Integer> majorities = new HashSet<>();
         for (Integer occurrence: resultsMap.values()) {
-            if (occurrence == majority) {
-                if (!majorities.add(occurrence)) {
-                    majority = -1;
-                    break;
-                }
+            if (occurrence == majority && !majorities.add(occurrence)) {
+                majority = -1;
+                break;
             }
         }
     }
