@@ -18,7 +18,7 @@ import static java.util.Optional.of;
 @SuppressWarnings("unchecked")
 public class DemocraticDecisorImpl<I extends Collection<I>, O, H> implements DemocraticDecisor<I, O, H> {
 
-    private int majority = 0;
+    private int majority = -1;
 
     public O decide(Collection<I> i, H head) throws ShuttleDecisorIndeterminateResultException {
         if (!diffFound(i, head)) {
