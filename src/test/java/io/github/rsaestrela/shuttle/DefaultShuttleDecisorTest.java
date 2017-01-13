@@ -80,14 +80,14 @@ public class DefaultShuttleDecisorTest {
         }
     }
 
-    @Test(enabled = false, description = "string is not the best heavy object btw")
+    @Test(enabled = true, description = "string is not the best heavy object btw")
     public void shouldDecideForTheMajority1MHeavyString() {
         Source<String> stringSource = new Source<>();
-        String[] stringArray = new String[666666];
-        for (int i = 0; i < 666666; i++) {
-            stringArray[i] = RandomStringUtils.random(1000, true, true);
+        String[] stringArray = new String[99998];
+        for (int i = 0; i < 99998; i++) {
+            stringArray[i] = RandomStringUtils.random(100, true, true);
         }
-        List<String> strings = stringSource.anValuedArrayListWithDuplicates(333334, 1000000, String.class, "shutter", stringArray);
+        List<String> strings = stringSource.anValuedArrayListWithDuplicates(2, 100000, String.class, "shutter", stringArray);
         ShuttleDecision<String> defaultShuttleDecision = new DefaultShuttleDecision<>(strings);
         try {
             long started = System.nanoTime();

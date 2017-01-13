@@ -3,10 +3,7 @@ package io.github.rsaestrela.shuttle.decisor;
 import io.github.rsaestrela.shuttle.decisor.exception.ShuttleDecisorIndeterminateResultException;
 import io.github.rsaestrela.shuttle.decisor.function.DemocraticDecisor;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -21,17 +18,19 @@ import static java.util.Optional.of;
 @SuppressWarnings("unchecked")
 public class DemocraticDecisorImpl<I extends Collection<I>, O, H> implements DemocraticDecisor<I, O, H> {
 
-    @Override
-    public double majority(Collection<I> i) {
-        return i.size() / 3;
-    }
+    private int majority = 0;
 
     public O decide(Collection<I> i, H head) throws ShuttleDecisorIndeterminateResultException {
         if (!diffFound(i, head)) {
             return (O) head;
         }
         final Object[] iArray = i.toArray();
-        final Optional<Object> decision = getDecision(toResultMap(iArray), majority(i));
+        final Map<?, Integer> resultsMap = getResultsMap(iArray);
+
+        getAndSetMajority(resultsMap);
+        failOnRepeatedMajorities(resultsMap);
+
+        final Optional<Object> decision = getDecision(resultsMap);
         if (!decision.isPresent()) {
             throw new ShuttleDecisorIndeterminateResultException("Cannot compute a decision");
         }
@@ -48,25 +47,50 @@ public class DemocraticDecisorImpl<I extends Collection<I>, O, H> implements Dem
         return false;
     }
 
-    private Map<?, Integer> toResultMap(Object[] i) {
-        Map<Object, Integer> resultMap = new HashMap<>();
+    private Map<?, Integer> getResultsMap(Object[] i) {
+        Map<Object, Integer> resultsMap = new HashMap<>();
         for (Object curr : i) {
-            if (resultMap.containsKey(curr)) {
-                resultMap.put(curr, resultMap.get(curr) + 1);
+            if (resultsMap.containsKey(curr)) {
+                resultsMap.put(curr, resultsMap.get(curr) + 1);
             } else {
-                resultMap.put(curr, 1);
+                resultsMap.put(curr, 1);
             }
         }
-        return resultMap;
+        return resultsMap;
     }
 
-    private Optional<Object> getDecision(Map<?, Integer> resultMap, double majority) {
+    private void getAndSetMajority(Map<?, Integer> resultsMap) {
+        for (Integer occurrence: resultsMap.values()) {
+            if (occurrence > majority) {
+                majority = occurrence;
+            }
+        }
+    }
+
+    private void failOnRepeatedMajorities(Map<?, Integer> resultsMap) {
+        Set<Integer> majorities = new HashSet<>();
+        for (Integer occurrence: resultsMap.values()) {
+            if (occurrence == majority) {
+                if (!majorities.add(occurrence)) {
+                    majority = -1;
+                    break;
+                }
+            }
+        }
+    }
+
+    private Optional<Object> getDecision(Map<?, Integer> resultMap) {
         for (Object key: resultMap.keySet()) {
             int value = resultMap.get(key);
-            if (value >= majority) {
+            if (value == majority) {
                 return of(key);
             }
         }
         return empty();
+    }
+
+    @Override
+    public int majority(Collection<I> i) {
+        return majority;
     }
 }
