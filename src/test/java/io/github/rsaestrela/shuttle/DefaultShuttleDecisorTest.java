@@ -99,6 +99,31 @@ public class DefaultShuttleDecisorTest {
         }
     }
 
+    private class TestObject {
+
+        private Integer boxedIntField;
+        private String stringField;
+
+        public TestObject(Integer boxedIntField, String stringField) {
+            this.boxedIntField = boxedIntField;
+            this.stringField = stringField;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            TestObject that = (TestObject) o;
+            return Objects.equals(boxedIntField, that.boxedIntField) &&
+                    Objects.equals(stringField, that.stringField);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(boxedIntField, stringField);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private class Source<T> {
 

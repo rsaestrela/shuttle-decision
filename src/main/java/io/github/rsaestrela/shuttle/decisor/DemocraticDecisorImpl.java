@@ -28,59 +28,62 @@ public class DemocraticDecisorImpl<I extends Collection<I>, O, H>
     /**
      * Aims to choose an element from the supplied collection, based on
      * democratic rules. Given a non empty collection of <i>n</i> elements
-     * it will decide to return the most repeated element found.
+     * it will decide to return the most repeated element found. It's an
+     * atomic operation in the sense that can only return a valid element,
+     * otherwise throws an exception.
      *
-     * If all elements are equal returns the parameter {@param head}.
-     * If all the elements exist in the same quantity in the provided
-     * collection or the most contained elements exist repeatedly
-     * it will throw a checked  {@link ShuttleDecisorIndeterminateResultException}
-     * exception.
+     * Object comparison is based in {@link HashMap::hash} so you don't
+     * have to override your objects hashcode nor equals.
+     *
+     * @return O the chosen element
+     * @throws ShuttleDecisorIndeterminateResultException
      */
-    public O decide(Collection<I> collection, H head) throws ShuttleDecisorIndeterminateResultException {
+    public O decide(Collection<I> collection, H head)
+            throws ShuttleDecisorIndeterminateResultException {
 
-        final Map<?, Integer> resultsMap = getResultsMap(collection);
+        final Map<?, Integer> entriesMap = mapEntries(collection);
 
-        if (sameElements(resultsMap)) {
+        if (sameElements(entriesMap)) {
             return (O) head;
         }
 
-        getAndSetMajority(resultsMap);
-        noMajorityOnRepeated(resultsMap);
+        getAndSetMajority(entriesMap.values());
+        noMajorityOnRepeated(entriesMap.values());
 
-        final Optional<Object> decision = getDecision(resultsMap);
+        final Optional<Object> decision = getDecision(entriesMap);
         if (!decision.isPresent()) {
             throw new ShuttleDecisorIndeterminateResultException("Cannot compute a decision");
         }
         return (O) decision.get();
     }
 
-    private boolean sameElements(Map<?, Integer> resultsMap) {
-        return resultsMap.size() == 1;
-    }
-
-    private Map<?, Integer> getResultsMap(Collection<I> i) {
-        Map<Object, Integer> resultsMap = new HashMap<>();
+    private Map<?, Integer> mapEntries(Collection<I> i) {
+        Map<Object, Integer> entriesMap = new HashMap<>();
         for (Object curr : i.toArray()) {
-            if (resultsMap.containsKey(curr)) {
-                resultsMap.put(curr, resultsMap.get(curr) + 1);
+            if (entriesMap.containsKey(curr)) {
+                entriesMap.put(curr, entriesMap.get(curr) + 1);
             } else {
-                resultsMap.put(curr, 1);
+                entriesMap.put(curr, 1);
             }
         }
-        return resultsMap;
+        return entriesMap;
     }
 
-    private void getAndSetMajority(Map<?, Integer> resultsMap) {
-        for (Integer occurrence: resultsMap.values()) {
+    private boolean sameElements(Map<?, Integer> entriesMap) {
+        return entriesMap.size() == 1;
+    }
+
+    private void getAndSetMajority(Collection<Integer> allMappedValues) {
+        for (Integer occurrence: allMappedValues) {
             if (occurrence > majority) {
                 majority = occurrence;
             }
         }
     }
 
-    private void noMajorityOnRepeated(Map<?, Integer> resultsMap) {
+    private void noMajorityOnRepeated(Collection<Integer> allMajorities) {
         Set<Integer> majorities = new HashSet<>();
-        for (Integer occurrence: resultsMap.values()) {
+        for (Integer occurrence: allMajorities) {
             if (occurrence == majority && !majorities.add(occurrence)) {
                 majority = -1;
                 break;
@@ -88,9 +91,9 @@ public class DemocraticDecisorImpl<I extends Collection<I>, O, H>
         }
     }
 
-    private Optional<Object> getDecision(Map<?, Integer> resultMap) {
-        for (Object key: resultMap.keySet()) {
-            int value = resultMap.get(key);
+    private Optional<Object> getDecision(Map<?, Integer> entriesMap) {
+        for (Object key: entriesMap.keySet()) {
+            int value = entriesMap.get(key);
             if (value == majority) {
                 return of(key);
             }
