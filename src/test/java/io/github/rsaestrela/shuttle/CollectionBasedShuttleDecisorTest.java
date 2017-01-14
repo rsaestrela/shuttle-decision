@@ -14,7 +14,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
-public class DefaultShuttleDecisorTest {
+public class CollectionBasedShuttleDecisorTest {
 
     @DataProvider(name = "emptyOrNullStructuresProvider")
     public Object[][] emptyOrNullStructuresProvider() {
@@ -33,7 +33,7 @@ public class DefaultShuttleDecisorTest {
     @Test(dataProvider = "emptyOrNullStructuresProvider")
     public void shouldFailFastOnEmptyCollection(Collection<?> collection) {
         try {
-            new DefaultShuttleDecision<>(collection);
+            new CollectionBasedShuttleDecision<>(collection);
         } catch (ShuttleDecisorInstantiationException e) {
             return;
         }
@@ -42,10 +42,13 @@ public class DefaultShuttleDecisorTest {
 
     @Test
     public void shouldReturnFirstValueIfAllTheSame() {
-        ShuttleDecision<String> defaultShuttleDecision = new DefaultShuttleDecision<>(Arrays.asList("2", "2", "2", "2", "2"));
+
+        CollectableShuttleDecision<String> collectionBasedShuttleDecision =
+                new CollectionBasedShuttleDecision<>(Arrays.asList("2", "2", "2", "2", "2"));
 
         try {
-            String decision = defaultShuttleDecision.decide();
+            String decision = collectionBasedShuttleDecision.decide();
+            assertEquals(collectionBasedShuttleDecision.majority(), -1);
             assertEquals(decision, "2");
         } catch (ShuttleDecisorIndeterminateResultException e) {
             fail();
@@ -54,9 +57,11 @@ public class DefaultShuttleDecisorTest {
 
     @Test
     public void shouldDecideForTheMajority() {
-        ShuttleDecision<String> defaultShuttleDecision = new DefaultShuttleDecision<>(Arrays.asList("1", "1", "1", "2", "3"));
+        CollectableShuttleDecision<String> collectionBasedShuttleDecision =
+                new CollectionBasedShuttleDecision<>(Arrays.asList("1", "1", "1", "2", "3"));
         try {
-            String decision = defaultShuttleDecision.decide();
+            String decision = collectionBasedShuttleDecision.decide();
+            assertEquals(collectionBasedShuttleDecision.majority(), 3);
             assertEquals(decision, "1");
         } catch (ShuttleDecisorIndeterminateResultException e) {
             fail();
@@ -71,16 +76,18 @@ public class DefaultShuttleDecisorTest {
             intArray[i] = i;
         }
         List<Integer> integers = integerSource.anValuedArrayListWithDuplicates(333334, 1000000, Integer.class, 1, intArray);
-        ShuttleDecision<Integer> defaultShuttleDecision = new DefaultShuttleDecision<>(integers);
+        CollectableShuttleDecision<Integer> collectionBasedShuttleDecision =
+                new CollectionBasedShuttleDecision<>(integers);
         try {
-            Integer decision = defaultShuttleDecision.decide();
+            Integer decision = collectionBasedShuttleDecision.decide();
+            assertEquals(collectionBasedShuttleDecision.majority(), 333335);
             assertEquals(decision, new Integer(1));
         } catch (ShuttleDecisorIndeterminateResultException e) {
             fail();
         }
     }
 
-    @Test(enabled = true, description = "string is not the best heavy object btw")
+    @Test(description = "string is not the best heavy object btw")
     public void shouldDecideForTheMajority1MHeavyString() {
         Source<String> stringSource = new Source<>();
         String[] stringArray = new String[99998];
@@ -88,12 +95,12 @@ public class DefaultShuttleDecisorTest {
             stringArray[i] = RandomStringUtils.random(100, true, true);
         }
         List<String> strings = stringSource.anValuedArrayListWithDuplicates(2, 100000, String.class, "shutter", stringArray);
-        ShuttleDecision<String> defaultShuttleDecision = new DefaultShuttleDecision<>(strings);
+        CollectableShuttleDecision<String> collectionBasedShuttleDecision =
+                new CollectionBasedShuttleDecision<>(strings);
         try {
-            long started = System.nanoTime();
-            String decision = defaultShuttleDecision.decide();
+            String decision = collectionBasedShuttleDecision.decide();
             assertEquals(decision, "shutter");
-            System.out.println((System.nanoTime() - started));
+            assertEquals(collectionBasedShuttleDecision.majority(), 2);
         } catch (ShuttleDecisorIndeterminateResultException e) {
             fail();
         }

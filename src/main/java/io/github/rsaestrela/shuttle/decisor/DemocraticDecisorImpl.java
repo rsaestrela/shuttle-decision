@@ -1,7 +1,7 @@
 package io.github.rsaestrela.shuttle.decisor;
 
 import io.github.rsaestrela.shuttle.decisor.exception.ShuttleDecisorIndeterminateResultException;
-import io.github.rsaestrela.shuttle.decisor.function.DemocraticDecisor;
+import io.github.rsaestrela.shuttle.decisor.function.CollectionBasedDemocraticDecisor;
 
 import java.util.*;
 
@@ -9,7 +9,8 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 /**
- * Collection based implementation of {@link DemocraticDecisor}.
+ * Collection based implementation of
+ * {@link CollectionBasedDemocraticDecisor}.
  *
  * <i>Democratic decision making is when the leader gives up
  * ownership and control of a decision and allows the group
@@ -21,7 +22,7 @@ import static java.util.Optional.of;
  */
 @SuppressWarnings("unchecked")
 public class DemocraticDecisorImpl<I extends Collection<I>, O, H>
-        implements DemocraticDecisor<I, O, H> {
+        implements CollectionBasedDemocraticDecisor<I, O, H> {
 
     private int majority = -1;
 
@@ -36,7 +37,8 @@ public class DemocraticDecisorImpl<I extends Collection<I>, O, H>
      * have to override your objects hashcode nor equals.
      *
      * @return O the chosen element
-     * @throws ShuttleDecisorIndeterminateResultException
+     * @throws ShuttleDecisorIndeterminateResultException if no decision
+     * could be computed
      */
     public O decide(Collection<I> collection, H head)
             throws ShuttleDecisorIndeterminateResultException {

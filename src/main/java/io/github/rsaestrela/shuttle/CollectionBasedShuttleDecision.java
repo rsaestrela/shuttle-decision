@@ -3,17 +3,23 @@ package io.github.rsaestrela.shuttle;
 import io.github.rsaestrela.shuttle.decisor.DemocraticDecisorImpl;
 import io.github.rsaestrela.shuttle.decisor.exception.ShuttleDecisorIndeterminateResultException;
 import io.github.rsaestrela.shuttle.decisor.exception.ShuttleDecisorInstantiationException;
-import io.github.rsaestrela.shuttle.decisor.function.DemocraticDecisor;
+import io.github.rsaestrela.shuttle.decisor.function.CollectionBasedDemocraticDecisor;
 
 import java.util.Collection;
 
 @SuppressWarnings("unchecked")
-public final class DefaultShuttleDecision<I extends Collection<I>, O, H> extends AbstractShuttleDecision<I, O, H> {
+public final class CollectionBasedShuttleDecision<I extends Collection<I>, O, H>
+        extends AbstractCollectionBasedShuttleDecision<I, O, H> {
 
-    private DemocraticDecisor<I, O, H> decisor = new DemocraticDecisorImpl<>();
+    private CollectionBasedDemocraticDecisor<I, O, H> decisor = new DemocraticDecisorImpl<>();
 
-    public DefaultShuttleDecision(Collection i) {
+    public CollectionBasedShuttleDecision(Collection i) {
         super(i);
+    }
+
+    @Override
+    public int majority() {
+        return decisor.majority(i);
     }
 
     @Override
