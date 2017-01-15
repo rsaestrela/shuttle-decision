@@ -3,6 +3,7 @@ package io.github.rsaestrela.shuttle;
 import io.github.rsaestrela.shuttle.decisor.exception.ShuttleDecisorIndeterminateResultException;
 
 import java.util.Collection;
+import java.util.Set;
 
 @SuppressWarnings("unchecked")
 public abstract class AbstractCollectionBasedShuttleDecision<I extends Collection, O, H>
@@ -17,9 +18,7 @@ public abstract class AbstractCollectionBasedShuttleDecision<I extends Collectio
         this.head = (H) i.toArray()[0];
     }
 
-    public abstract int majority();
-
-    public abstract O decide()
+    public abstract Set<O> decide()
             throws ShuttleDecisorIndeterminateResultException;
 
     protected abstract void checkArgs(Collection<I> i);

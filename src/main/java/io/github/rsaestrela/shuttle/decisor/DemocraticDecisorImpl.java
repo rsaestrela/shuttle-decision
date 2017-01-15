@@ -104,7 +104,8 @@ public class DemocraticDecisorImpl<I extends Collection<I>, O, H>
     }
 
     @Override
-    public int majority(Collection<I> i) {
+    public int majority() {
         return majority;
     }
+
 }

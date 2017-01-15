@@ -1,8 +1,10 @@
 package io.github.rsaestrela.shuttle;
 
 
+import io.github.rsaestrela.shuttle.decisor.DemocraticDecisorImpl;
 import io.github.rsaestrela.shuttle.decisor.exception.ShuttleDecisorIndeterminateResultException;
 import io.github.rsaestrela.shuttle.decisor.exception.ShuttleDecisorInstantiationException;
+import io.github.rsaestrela.shuttle.decisor.function.CollectionBasedDemocraticDecisor;
 import org.apache.commons.lang.RandomStringUtils;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -11,8 +13,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 public class CollectionBasedShuttleDecisorTest {
 
@@ -43,13 +44,18 @@ public class CollectionBasedShuttleDecisorTest {
     @Test
     public void shouldReturnFirstValueIfAllTheSame() {
 
-        CollectableShuttleDecision<String> collectionBasedShuttleDecision =
+        CollectableShuttleDecision<Set<String>> collectionBasedShuttleDecision =
                 new CollectionBasedShuttleDecision<>(Arrays.asList("2", "2", "2", "2", "2"));
 
         try {
-            String decision = collectionBasedShuttleDecision.decide();
-            assertEquals(collectionBasedShuttleDecision.majority(), -1);
-            assertEquals(decision, "2");
+
+            CollectionBasedDemocraticDecisor democraticDecisor = new DemocraticDecisorImpl();
+            Set decisions = collectionBasedShuttleDecision
+                    .withDecisor(democraticDecisor)
+                    .decide();
+
+            assertTrue(decisions.contains("2"));
+            assertEquals(democraticDecisor.majority(), -1);
         } catch (ShuttleDecisorIndeterminateResultException e) {
             fail();
         }
@@ -60,9 +66,10 @@ public class CollectionBasedShuttleDecisorTest {
         CollectableShuttleDecision<String> collectionBasedShuttleDecision =
                 new CollectionBasedShuttleDecision<>(Arrays.asList("1", "1", "1", "2", "3"));
         try {
-            String decision = collectionBasedShuttleDecision.decide();
-            assertEquals(collectionBasedShuttleDecision.majority(), 3);
-            assertEquals(decision, "1");
+            Set decisions = collectionBasedShuttleDecision
+                    .withDecisor(new DemocraticDecisorImpl<>())
+                    .decide();
+            assertTrue(decisions.contains("1"));
         } catch (ShuttleDecisorIndeterminateResultException e) {
             fail();
         }
@@ -79,9 +86,10 @@ public class CollectionBasedShuttleDecisorTest {
         CollectableShuttleDecision<Integer> collectionBasedShuttleDecision =
                 new CollectionBasedShuttleDecision<>(integers);
         try {
-            Integer decision = collectionBasedShuttleDecision.decide();
-            assertEquals(collectionBasedShuttleDecision.majority(), 333335);
-            assertEquals(decision, new Integer(1));
+            Set decisions = collectionBasedShuttleDecision
+                    .withDecisor(new DemocraticDecisorImpl<>())
+                    .decide();
+            assertTrue(decisions.contains(1));
         } catch (ShuttleDecisorIndeterminateResultException e) {
             fail();
         }
@@ -89,6 +97,7 @@ public class CollectionBasedShuttleDecisorTest {
 
     @Test(description = "string is not the best heavy object btw")
     public void shouldDecideForTheMajority1MHeavyString() {
+
         Source<String> stringSource = new Source<>();
         String[] stringArray = new String[99998];
         for (int i = 0; i < 99998; i++) {
@@ -98,9 +107,10 @@ public class CollectionBasedShuttleDecisorTest {
         CollectableShuttleDecision<String> collectionBasedShuttleDecision =
                 new CollectionBasedShuttleDecision<>(strings);
         try {
-            String decision = collectionBasedShuttleDecision.decide();
-            assertEquals(decision, "shutter");
-            assertEquals(collectionBasedShuttleDecision.majority(), 2);
+            Set decisions = collectionBasedShuttleDecision
+                    .withDecisor(new DemocraticDecisorImpl<>())
+                    .decide();
+            assertTrue(decisions.contains("shutter"));
         } catch (ShuttleDecisorIndeterminateResultException e) {
             fail();
         }
@@ -125,10 +135,6 @@ public class CollectionBasedShuttleDecisorTest {
                     Objects.equals(stringField, that.stringField);
         }
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(boxedIntField, stringField);
-        }
     }
 
     @SuppressWarnings("unchecked")
